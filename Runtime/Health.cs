@@ -48,8 +48,9 @@ namespace Healthy
 
         public void Revive()
         {
-            if (!isDead)
+            if (!IsDead)
                 return;
+                
             IsDead = false;
             CurrentHealth = 1;
             StartRegen(withDelay: false);
