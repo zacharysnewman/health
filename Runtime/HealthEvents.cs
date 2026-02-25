@@ -21,6 +21,8 @@ namespace Healthy
         public UnityEvent OnMaxHealthEvent = new UnityEvent();
         public UnityEvent OnRegenShieldStartEvent = new UnityEvent();
         public UnityEvent OnRegenHealthStartEvent = new UnityEvent();
+        public UnityEvent<float> OnOverhealEvent = new UnityEvent<float>();
+        public UnityEvent<float> OnOverchargeShieldEvent = new UnityEvent<float>();
     }
 }
 

@@ -116,8 +116,11 @@ namespace Healthy
             if (IsDead || !healthData.Traits.HasShields)
                 return;
 
+            float shieldOverage = Mathf.Max(0, currentShield + amount - healthData.Traits.MaxShield);
             CurrentShield += amount;
             events.OnChargeShieldEvent?.Invoke(amount);
+            if (shieldOverage > 0)
+                events.OnOverchargeShieldEvent?.Invoke(shieldOverage);
         }
 
         public void HealHealth(float amount)
@@ -128,8 +131,11 @@ namespace Healthy
             if (IsDead)
                 return;
 
+            float healthOverage = Mathf.Max(0, currentHealth + amount - MaxHealth);
             CurrentHealth += amount;
             events.OnHealHealthEvent?.Invoke(amount);
+            if (healthOverage > 0)
+                events.OnOverhealEvent?.Invoke(healthOverage);
         }
 
         public void StartRegen(bool withDelay)
