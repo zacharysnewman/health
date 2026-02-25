@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/zacharysnewman/health/compare/v1.0.2...v1.1.0) (2026-02-25)
+
+
+### Features
+
+* add CLAUDE.md with conventional commit guidelines ([6d5d7e8](https://github.com/zacharysnewman/health/commit/6d5d7e8000dc3c3e26e78a249acc71836b1c4477))
+
 ## [1.0.2](https://github.com/zacharysnewman/health/compare/v1.0.1...v1.0.2) (2024-06-28)
 
 
