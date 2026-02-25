@@ -38,6 +38,18 @@ namespace Healthy
         private bool shieldBleedThrough;
         public bool ShieldBleedThrough { get => shieldBleedThrough; private set => shieldBleedThrough = value; }
 
+        [SerializeField]
+        private bool hasShields;
+        public bool HasShields { get => hasShields; private set => hasShields = value; }
+
+        [SerializeField]
+        private bool shouldHealthRegen;
+        public bool ShouldHealthRegen { get => shouldHealthRegen; private set => shouldHealthRegen = value; }
+
+        [SerializeField]
+        private bool shouldShieldRegen;
+        public bool ShouldShieldRegen { get => shouldShieldRegen; private set => shouldShieldRegen = value; }
+
         public HealthTraits()
         {
             this.MaxHealth = 100;
@@ -48,9 +60,12 @@ namespace Healthy
             this.HealthRegenDelay = 1;
             this.ShieldRegenDelay = 2;
             this.ShieldBleedThrough = true;
+            this.HasShields = true;
+            this.ShouldHealthRegen = true;
+            this.ShouldShieldRegen = true;
         }
 
-        public HealthTraits(float maxHealth, float maxShield, RegenTrigger regenTrigger, float healthRegenRate, float shieldRegenRate, float healthRegenDelay, float shieldRegenDelay, bool shieldBleedThrough)
+        public HealthTraits(float maxHealth, float maxShield, RegenTrigger regenTrigger, float healthRegenRate, float shieldRegenRate, float healthRegenDelay, float shieldRegenDelay, bool shieldBleedThrough, bool hasShields, bool shouldHealthRegen, bool shouldShieldRegen)
         {
             this.MaxHealth = maxHealth;
             this.MaxShield = maxShield;
@@ -60,6 +75,9 @@ namespace Healthy
             this.HealthRegenDelay = healthRegenDelay;
             this.ShieldRegenDelay = shieldRegenDelay;
             this.ShieldBleedThrough = shieldBleedThrough;
+            this.HasShields = hasShields;
+            this.ShouldHealthRegen = shouldHealthRegen;
+            this.ShouldShieldRegen = shouldShieldRegen;
         }
     }
 }
