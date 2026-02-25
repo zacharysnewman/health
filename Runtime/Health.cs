@@ -32,7 +32,7 @@ namespace Healthy
                 events.OnShieldChangeNormalizedEvent?.Invoke(currentShield / healthData.Traits.MaxShield);
             }
         }
-        public bool IsDead { get => isDead; set => isDead = value; }
+        public bool IsDead { get => isDead; private set => isDead = value; }
 
         void Start()
         {
@@ -48,11 +48,30 @@ namespace Healthy
 
         public void Revive()
         {
+            ReviveInternal(1f, 0f);
+        }
+
+        public void Revive(float healthPercent, float shieldPercent = 0f)
+        {
+            ReviveInternal(
+                healthData.Traits.MaxHealth * Mathf.Clamp01(healthPercent),
+                healthData.Traits.MaxShield * Mathf.Clamp01(shieldPercent)
+            );
+        }
+
+        public void Revive(int healthAmount, int shieldAmount = 0)
+        {
+            ReviveInternal(healthAmount, shieldAmount);
+        }
+
+        private void ReviveInternal(float health, float shield)
+        {
             if (!IsDead)
                 return;
-                
+
             IsDead = false;
-            CurrentHealth = 1;
+            CurrentHealth = health;
+            CurrentShield = shield;
             StartRegen(withDelay: false);
             events.OnReviveEvent?.Invoke();
         }
@@ -63,7 +82,10 @@ namespace Healthy
                 throw new ArgumentException("Damage value cannot be negative");
 
             if (IsDead)
+            {
+                events.OnOverkillEvent?.Invoke(amount);
                 return;
+            }
 
             StopRegen();
 
@@ -73,7 +95,7 @@ namespace Healthy
             {
                 IsDead = true;
                 StopRegen();
-                events.OnDieEvent?.Invoke();
+                events.OnDieEvent?.Invoke(amount);
             }
             else
             {

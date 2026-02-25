@@ -15,7 +15,8 @@ namespace Healthy
         public UnityEvent<float> OnChargeShieldEvent = new UnityEvent<float>();
         public UnityEvent<float> OnHealHealthEvent = new UnityEvent<float>();
         public UnityEvent OnReviveEvent = new UnityEvent();
-        public UnityEvent OnDieEvent = new UnityEvent();
+        public UnityEvent<float> OnDieEvent = new UnityEvent<float>();
+        public UnityEvent<float> OnOverkillEvent = new UnityEvent<float>();
         public UnityEvent OnMaxShieldEvent = new UnityEvent();
         public UnityEvent OnMaxHealthEvent = new UnityEvent();
         public UnityEvent OnRegenShieldStartEvent = new UnityEvent();
