@@ -12,14 +12,16 @@ namespace Healthy
 
         public HealthData healthData;
         public HealthEvents events;
+        public float MaxHealthBonus = 0f;
+        private float MaxHealth => healthData.Traits.MaxHealth + MaxHealthBonus;
         public float CurrentHealth
         {
             get => currentHealth;
             set
             {
-                currentHealth = Mathf.Clamp(value, 0, healthData.Traits.MaxHealth);
+                currentHealth = Mathf.Clamp(value, 0, MaxHealth);
                 events.OnHealthChangeEvent?.Invoke(currentHealth);
-                events.OnHealthChangeNormalizedEvent?.Invoke(currentHealth / healthData.Traits.MaxHealth);
+                events.OnHealthChangeNormalizedEvent?.Invoke(currentHealth / MaxHealth);
             }
         }
         public float CurrentShield
@@ -41,7 +43,7 @@ namespace Healthy
 
         public void InitializeValues()
         {
-            CurrentHealth = healthData.Traits.MaxHealth;
+            CurrentHealth = MaxHealth;
             CurrentShield = healthData.Traits.MaxShield;
             IsDead = false;
         }
@@ -54,7 +56,7 @@ namespace Healthy
         public void Revive(float healthPercent, float shieldPercent = 0f)
         {
             ReviveInternal(
-                healthData.Traits.MaxHealth * Mathf.Clamp01(healthPercent),
+                MaxHealth * Mathf.Clamp01(healthPercent),
                 healthData.Traits.MaxShield * Mathf.Clamp01(shieldPercent)
             );
         }
@@ -179,7 +181,7 @@ namespace Healthy
 
             events.OnRegenHealthStartEvent?.Invoke();
 
-            while (CurrentHealth < healthData.Traits.MaxHealth)
+            while (CurrentHealth < MaxHealth)
             {
                 CurrentHealth += healthData.Traits.HealthRegenRate * Time.deltaTime;
                 yield return new WaitForEndOfFrame();
