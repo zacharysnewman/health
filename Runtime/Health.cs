@@ -29,6 +29,8 @@ namespace Healthy
             get => currentShield;
             set
             {
+                if (!healthData.Traits.HasShields)
+                    return;
                 currentShield = Mathf.Clamp(value, 0, healthData.Traits.MaxShield);
                 events.OnShieldChangeEvent?.Invoke(currentShield);
                 events.OnShieldChangeNormalizedEvent?.Invoke(currentShield / healthData.Traits.MaxShield);
@@ -111,7 +113,7 @@ namespace Healthy
             if (amount < 0)
                 throw new ArgumentException("Charge value cannot be negative");
 
-            if (IsDead)
+            if (IsDead || !healthData.Traits.HasShields)
                 return;
 
             CurrentShield += amount;
@@ -162,6 +164,9 @@ namespace Healthy
 
         private IEnumerator RegenShieldCoroutine(bool withDelay)
         {
+            if (!healthData.Traits.HasShields || !healthData.Traits.ShouldShieldRegen)
+                yield break;
+
             if (withDelay)
                 yield return new WaitForSeconds(healthData.Traits.ShieldRegenDelay);
 
@@ -176,6 +181,9 @@ namespace Healthy
 
         private IEnumerator RegenHealthCoroutine(bool withDelay)
         {
+            if (!healthData.Traits.ShouldHealthRegen)
+                yield break;
+
             if (withDelay)
                 yield return new WaitForSeconds(healthData.Traits.HealthRegenDelay);
 
