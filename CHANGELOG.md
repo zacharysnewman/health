@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/zacharysnewman/health/compare/v1.1.0...v1.2.0) (2026-03-04)
+
+
+### Features
+
+* rewrite README with full API documentation ([132611f](https://github.com/zacharysnewman/health/commit/132611f1d2f5f5fde0c76814607c0c3e418ec0e4))
+
 # [1.1.0](https://github.com/zacharysnewman/health/compare/v1.0.2...v1.1.0) (2026-02-25)
 
 
