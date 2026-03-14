@@ -68,23 +68,23 @@ namespace Healthy.Networking.Fusion
                 SyncedIsDead = health.IsDead;
                 SyncedMaxHealthBonus = health.MaxHealthBonus;
 
-                health.events.OnHealthChangeEvent.AddListener(value => SyncedHealth = value);
-                health.events.OnShieldChangeEvent.AddListener(value => SyncedShield = value);
-                health.events.OnDieEvent.AddListener(_ => SyncedIsDead = true);
-                health.events.OnReviveEvent.AddListener(() => SyncedIsDead = false);
+                health.events.OnHealthChangeEvent.AddListener(OnAuthorityHealthChanged);
+                health.events.OnShieldChangeEvent.AddListener(OnAuthorityShieldChanged);
+                health.events.OnDieEvent.AddListener(OnAuthorityDied);
+                health.events.OnReviveEvent.AddListener(OnAuthorityRevived);
 
-                health.events.OnDamageEvent.AddListener(amount => Rpc_BroadcastDamage(amount));
-                health.events.OnDieEvent.AddListener(amount => Rpc_BroadcastDie(amount));
-                health.events.OnOverkillEvent.AddListener(amount => Rpc_BroadcastOverkill(amount));
-                health.events.OnHealHealthEvent.AddListener(amount => Rpc_BroadcastHealHealth(amount));
-                health.events.OnOverhealEvent.AddListener(amount => Rpc_BroadcastOverheal(amount));
-                health.events.OnChargeShieldEvent.AddListener(amount => Rpc_BroadcastChargeShield(amount));
-                health.events.OnOverchargeShieldEvent.AddListener(amount => Rpc_BroadcastOverchargeShield(amount));
-                health.events.OnReviveEvent.AddListener(() => Rpc_BroadcastRevive());
-                health.events.OnRegenHealthStartEvent.AddListener(() => Rpc_BroadcastRegenHealthStart());
-                health.events.OnRegenShieldStartEvent.AddListener(() => Rpc_BroadcastRegenShieldStart());
-                health.events.OnMaxHealthEvent.AddListener(() => Rpc_BroadcastMaxHealth());
-                health.events.OnMaxShieldEvent.AddListener(() => Rpc_BroadcastMaxShield());
+                health.events.OnDamageEvent.AddListener(OnAuthorityDamage);
+                health.events.OnDieEvent.AddListener(OnAuthorityDie);
+                health.events.OnOverkillEvent.AddListener(OnAuthorityOverkill);
+                health.events.OnHealHealthEvent.AddListener(OnAuthorityHealHealth);
+                health.events.OnOverhealEvent.AddListener(OnAuthorityOverheal);
+                health.events.OnChargeShieldEvent.AddListener(OnAuthorityChargeShield);
+                health.events.OnOverchargeShieldEvent.AddListener(OnAuthorityOverchargeShield);
+                health.events.OnReviveEvent.AddListener(OnAuthorityRevive);
+                health.events.OnRegenHealthStartEvent.AddListener(OnAuthorityRegenHealthStart);
+                health.events.OnRegenShieldStartEvent.AddListener(OnAuthorityRegenShieldStart);
+                health.events.OnMaxHealthEvent.AddListener(OnAuthorityMaxHealth);
+                health.events.OnMaxShieldEvent.AddListener(OnAuthorityMaxShield);
             }
             else
             {
@@ -105,41 +105,75 @@ namespace Healthy.Networking.Fusion
             }
         }
 
+        public override void Despawned(NetworkRunner runner, bool hasState)
+        {
+            if (!HasStateAuthority || health == null) return;
+
+            health.events.OnHealthChangeEvent.RemoveListener(OnAuthorityHealthChanged);
+            health.events.OnShieldChangeEvent.RemoveListener(OnAuthorityShieldChanged);
+            health.events.OnDieEvent.RemoveListener(OnAuthorityDied);
+            health.events.OnReviveEvent.RemoveListener(OnAuthorityRevived);
+
+            health.events.OnDamageEvent.RemoveListener(OnAuthorityDamage);
+            health.events.OnDieEvent.RemoveListener(OnAuthorityDie);
+            health.events.OnOverkillEvent.RemoveListener(OnAuthorityOverkill);
+            health.events.OnHealHealthEvent.RemoveListener(OnAuthorityHealHealth);
+            health.events.OnOverhealEvent.RemoveListener(OnAuthorityOverheal);
+            health.events.OnChargeShieldEvent.RemoveListener(OnAuthorityChargeShield);
+            health.events.OnOverchargeShieldEvent.RemoveListener(OnAuthorityOverchargeShield);
+            health.events.OnReviveEvent.RemoveListener(OnAuthorityRevive);
+            health.events.OnRegenHealthStartEvent.RemoveListener(OnAuthorityRegenHealthStart);
+            health.events.OnRegenShieldStartEvent.RemoveListener(OnAuthorityRegenShieldStart);
+            health.events.OnMaxHealthEvent.RemoveListener(OnAuthorityMaxHealth);
+            health.events.OnMaxShieldEvent.RemoveListener(OnAuthorityMaxShield);
+        }
+
         // OnChangedRender callbacks — called on proxies when [Networked] values change.
-        private void OnHealthChanged() => health.CurrentHealth = SyncedHealth;
-        private void OnShieldChanged() => health.CurrentShield = SyncedShield;
+        private void OnHealthChanged()      => health.CurrentHealth = SyncedHealth;
+        private void OnShieldChanged()      => health.CurrentShield = SyncedShield;
         private void OnMaxHealthBonusChanged() => health.MaxHealthBonus = SyncedMaxHealthBonus;
-        private void OnIsDeadChanged() { } // State sync only — events come via broadcast RPCs.
+        private void OnIsDeadChanged()      { } // State sync only — events come via broadcast RPCs.
+
+        // Networked property forwarding (state authority).
+        private void OnAuthorityHealthChanged(float v) => SyncedHealth = v;
+        private void OnAuthorityShieldChanged(float v) => SyncedShield = v;
+        private void OnAuthorityDied(float _)          => SyncedIsDead = true;
+        private void OnAuthorityRevived()              => SyncedIsDead = false;
+
+        // Broadcast forwarding (state authority → proxies).
+        private void OnAuthorityDamage(float a)           => Rpc_BroadcastDamage(a);
+        private void OnAuthorityDie(float a)              => Rpc_BroadcastDie(a);
+        private void OnAuthorityOverkill(float a)         => Rpc_BroadcastOverkill(a);
+        private void OnAuthorityHealHealth(float a)       => Rpc_BroadcastHealHealth(a);
+        private void OnAuthorityOverheal(float a)         => Rpc_BroadcastOverheal(a);
+        private void OnAuthorityChargeShield(float a)     => Rpc_BroadcastChargeShield(a);
+        private void OnAuthorityOverchargeShield(float a) => Rpc_BroadcastOverchargeShield(a);
+        private void OnAuthorityRevive()                  => Rpc_BroadcastRevive();
+        private void OnAuthorityRegenHealthStart()        => Rpc_BroadcastRegenHealthStart();
+        private void OnAuthorityRegenShieldStart()        => Rpc_BroadcastRegenShieldStart();
+        private void OnAuthorityMaxHealth()               => Rpc_BroadcastMaxHealth();
+        private void OnAuthorityMaxShield()               => Rpc_BroadcastMaxShield();
 
         // Broadcast RPCs — sent from state authority to proxies only, so no double-fire guard needed.
-        [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)] private void Rpc_BroadcastDamage(float amount)           => health.events.OnDamageEvent?.Invoke(amount);
-        [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)] private void Rpc_BroadcastDie(float amount)              => health.events.OnDieEvent?.Invoke(amount);
-        [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)] private void Rpc_BroadcastOverkill(float amount)         => health.events.OnOverkillEvent?.Invoke(amount);
-        [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)] private void Rpc_BroadcastHealHealth(float amount)       => health.events.OnHealHealthEvent?.Invoke(amount);
-        [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)] private void Rpc_BroadcastOverheal(float amount)         => health.events.OnOverhealEvent?.Invoke(amount);
-        [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)] private void Rpc_BroadcastChargeShield(float amount)     => health.events.OnChargeShieldEvent?.Invoke(amount);
-        [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)] private void Rpc_BroadcastOverchargeShield(float amount) => health.events.OnOverchargeShieldEvent?.Invoke(amount);
-        [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)] private void Rpc_BroadcastRevive()                       => health.events.OnReviveEvent?.Invoke();
-        [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)] private void Rpc_BroadcastRegenHealthStart()             => health.events.OnRegenHealthStartEvent?.Invoke();
-        [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)] private void Rpc_BroadcastRegenShieldStart()             => health.events.OnRegenShieldStartEvent?.Invoke();
-        [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)] private void Rpc_BroadcastMaxHealth()                    => health.events.OnMaxHealthEvent?.Invoke();
-        [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)] private void Rpc_BroadcastMaxShield()                    => health.events.OnMaxShieldEvent?.Invoke();
+        [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)] private void Rpc_BroadcastDamage(float a)           => health.events.OnDamageEvent?.Invoke(a);
+        [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)] private void Rpc_BroadcastDie(float a)              => health.events.OnDieEvent?.Invoke(a);
+        [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)] private void Rpc_BroadcastOverkill(float a)         => health.events.OnOverkillEvent?.Invoke(a);
+        [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)] private void Rpc_BroadcastHealHealth(float a)       => health.events.OnHealHealthEvent?.Invoke(a);
+        [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)] private void Rpc_BroadcastOverheal(float a)         => health.events.OnOverhealEvent?.Invoke(a);
+        [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)] private void Rpc_BroadcastChargeShield(float a)     => health.events.OnChargeShieldEvent?.Invoke(a);
+        [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)] private void Rpc_BroadcastOverchargeShield(float a) => health.events.OnOverchargeShieldEvent?.Invoke(a);
+        [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)] private void Rpc_BroadcastRevive()                  => health.events.OnReviveEvent?.Invoke();
+        [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)] private void Rpc_BroadcastRegenHealthStart()        => health.events.OnRegenHealthStartEvent?.Invoke();
+        [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)] private void Rpc_BroadcastRegenShieldStart()        => health.events.OnRegenShieldStartEvent?.Invoke();
+        [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)] private void Rpc_BroadcastMaxHealth()               => health.events.OnMaxHealthEvent?.Invoke();
+        [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)] private void Rpc_BroadcastMaxShield()               => health.events.OnMaxShieldEvent?.Invoke();
 
         // RPCs — callable by any peer, executed on state authority.
-        [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
-        public void Rpc_Damage(float amount) => health.Damage(amount);
-
-        [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
-        public void Rpc_HealHealth(float amount) => health.HealHealth(amount);
-
-        [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
-        public void Rpc_ChargeShield(float amount) => health.ChargeShield(amount);
-
-        [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
-        public void Rpc_Revive() => health.Revive();
-
-        [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
-        public void Rpc_SetMaxHealthBonus(float bonus) => MaxHealthBonus = bonus;
+        [Rpc(RpcSources.All, RpcTargets.StateAuthority)] public void Rpc_Damage(float amount)           => health.Damage(amount);
+        [Rpc(RpcSources.All, RpcTargets.StateAuthority)] public void Rpc_HealHealth(float amount)       => health.HealHealth(amount);
+        [Rpc(RpcSources.All, RpcTargets.StateAuthority)] public void Rpc_ChargeShield(float amount)     => health.ChargeShield(amount);
+        [Rpc(RpcSources.All, RpcTargets.StateAuthority)] public void Rpc_Revive()                       => health.Revive();
+        [Rpc(RpcSources.All, RpcTargets.StateAuthority)] public void Rpc_SetMaxHealthBonus(float bonus) => MaxHealthBonus = bonus;
     }
 }
 #endif

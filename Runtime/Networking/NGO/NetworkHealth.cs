@@ -76,23 +76,23 @@ namespace Healthy.Networking.NGO
                 netIsDead.Value = health.IsDead;
                 netMaxHealthBonus.Value = health.MaxHealthBonus;
 
-                health.events.OnHealthChangeEvent.AddListener(value => netHealth.Value = value);
-                health.events.OnShieldChangeEvent.AddListener(value => netShield.Value = value);
-                health.events.OnDieEvent.AddListener(_ => netIsDead.Value = true);
-                health.events.OnReviveEvent.AddListener(() => netIsDead.Value = false);
+                health.events.OnHealthChangeEvent.AddListener(OnServerHealthChanged);
+                health.events.OnShieldChangeEvent.AddListener(OnServerShieldChanged);
+                health.events.OnDieEvent.AddListener(OnServerDied);
+                health.events.OnReviveEvent.AddListener(OnServerRevived);
 
-                health.events.OnDamageEvent.AddListener(amount => BroadcastDamageClientRpc(amount));
-                health.events.OnDieEvent.AddListener(amount => BroadcastDieClientRpc(amount));
-                health.events.OnOverkillEvent.AddListener(amount => BroadcastOverkillClientRpc(amount));
-                health.events.OnHealHealthEvent.AddListener(amount => BroadcastHealHealthClientRpc(amount));
-                health.events.OnOverhealEvent.AddListener(amount => BroadcastOverhealClientRpc(amount));
-                health.events.OnChargeShieldEvent.AddListener(amount => BroadcastChargeShieldClientRpc(amount));
-                health.events.OnOverchargeShieldEvent.AddListener(amount => BroadcastOverchargeShieldClientRpc(amount));
-                health.events.OnReviveEvent.AddListener(() => BroadcastReviveClientRpc());
-                health.events.OnRegenHealthStartEvent.AddListener(() => BroadcastRegenHealthStartClientRpc());
-                health.events.OnRegenShieldStartEvent.AddListener(() => BroadcastRegenShieldStartClientRpc());
-                health.events.OnMaxHealthEvent.AddListener(() => BroadcastMaxHealthClientRpc());
-                health.events.OnMaxShieldEvent.AddListener(() => BroadcastMaxShieldClientRpc());
+                health.events.OnDamageEvent.AddListener(OnServerDamage);
+                health.events.OnDieEvent.AddListener(OnServerDie);
+                health.events.OnOverkillEvent.AddListener(OnServerOverkill);
+                health.events.OnHealHealthEvent.AddListener(OnServerHealHealth);
+                health.events.OnOverhealEvent.AddListener(OnServerOverheal);
+                health.events.OnChargeShieldEvent.AddListener(OnServerChargeShield);
+                health.events.OnOverchargeShieldEvent.AddListener(OnServerOverchargeShield);
+                health.events.OnReviveEvent.AddListener(OnServerRevive);
+                health.events.OnRegenHealthStartEvent.AddListener(OnServerRegenHealthStart);
+                health.events.OnRegenShieldStartEvent.AddListener(OnServerRegenShieldStart);
+                health.events.OnMaxHealthEvent.AddListener(OnServerMaxHealth);
+                health.events.OnMaxShieldEvent.AddListener(OnServerMaxShield);
             }
             else
             {
@@ -120,7 +120,27 @@ namespace Healthy.Networking.NGO
 
         public override void OnNetworkDespawn()
         {
-            if (!IsServer)
+            if (IsServer)
+            {
+                health.events.OnHealthChangeEvent.RemoveListener(OnServerHealthChanged);
+                health.events.OnShieldChangeEvent.RemoveListener(OnServerShieldChanged);
+                health.events.OnDieEvent.RemoveListener(OnServerDied);
+                health.events.OnReviveEvent.RemoveListener(OnServerRevived);
+
+                health.events.OnDamageEvent.RemoveListener(OnServerDamage);
+                health.events.OnDieEvent.RemoveListener(OnServerDie);
+                health.events.OnOverkillEvent.RemoveListener(OnServerOverkill);
+                health.events.OnHealHealthEvent.RemoveListener(OnServerHealHealth);
+                health.events.OnOverhealEvent.RemoveListener(OnServerOverheal);
+                health.events.OnChargeShieldEvent.RemoveListener(OnServerChargeShield);
+                health.events.OnOverchargeShieldEvent.RemoveListener(OnServerOverchargeShield);
+                health.events.OnReviveEvent.RemoveListener(OnServerRevive);
+                health.events.OnRegenHealthStartEvent.RemoveListener(OnServerRegenHealthStart);
+                health.events.OnRegenShieldStartEvent.RemoveListener(OnServerRegenShieldStart);
+                health.events.OnMaxHealthEvent.RemoveListener(OnServerMaxHealth);
+                health.events.OnMaxShieldEvent.RemoveListener(OnServerMaxShield);
+            }
+            else
             {
                 netHealth.OnValueChanged -= OnNetHealthChanged;
                 netShield.OnValueChanged -= OnNetShieldChanged;
@@ -129,41 +149,53 @@ namespace Healthy.Networking.NGO
             }
         }
 
-        private void OnNetHealthChanged(float _, float newValue) => health.CurrentHealth = newValue;
-        private void OnNetShieldChanged(float _, float newValue) => health.CurrentShield = newValue;
-        private void OnNetMaxHealthBonusChanged(float _, float newValue) => health.MaxHealthBonus = newValue;
-        private void OnNetIsDeadChanged(bool _, bool newValue) { } // State sync only — events come via ClientRpcs.
+        // NetworkVariable callbacks (clients).
+        private void OnNetHealthChanged(float _, float newValue)      => health.CurrentHealth = newValue;
+        private void OnNetShieldChanged(float _, float newValue)      => health.CurrentShield = newValue;
+        private void OnNetMaxHealthBonusChanged(float _, float v)     => health.MaxHealthBonus = v;
+        private void OnNetIsDeadChanged(bool _, bool newValue)        { } // State sync only — events come via ClientRpcs.
+
+        // NetworkVariable forwarding (server).
+        private void OnServerHealthChanged(float v) => netHealth.Value = v;
+        private void OnServerShieldChanged(float v) => netShield.Value = v;
+        private void OnServerDied(float _)          => netIsDead.Value = true;
+        private void OnServerRevived()              => netIsDead.Value = false;
+
+        // Broadcast forwarding (server → ClientRpc).
+        private void OnServerDamage(float a)           => BroadcastDamageClientRpc(a);
+        private void OnServerDie(float a)              => BroadcastDieClientRpc(a);
+        private void OnServerOverkill(float a)         => BroadcastOverkillClientRpc(a);
+        private void OnServerHealHealth(float a)       => BroadcastHealHealthClientRpc(a);
+        private void OnServerOverheal(float a)         => BroadcastOverhealClientRpc(a);
+        private void OnServerChargeShield(float a)     => BroadcastChargeShieldClientRpc(a);
+        private void OnServerOverchargeShield(float a) => BroadcastOverchargeShieldClientRpc(a);
+        private void OnServerRevive()                  => BroadcastReviveClientRpc();
+        private void OnServerRegenHealthStart()        => BroadcastRegenHealthStartClientRpc();
+        private void OnServerRegenShieldStart()        => BroadcastRegenShieldStartClientRpc();
+        private void OnServerMaxHealth()               => BroadcastMaxHealthClientRpc();
+        private void OnServerMaxShield()               => BroadcastMaxShieldClientRpc();
 
         // ClientRpcs — broadcast semantic events to all non-server clients.
         // IsServer guard prevents double-firing on the host, which already ran the event locally.
-        [ClientRpc] private void BroadcastDamageClientRpc(float amount)           { if (IsServer) return; health.events.OnDamageEvent?.Invoke(amount); }
-        [ClientRpc] private void BroadcastDieClientRpc(float amount)              { if (IsServer) return; health.events.OnDieEvent?.Invoke(amount); }
-        [ClientRpc] private void BroadcastOverkillClientRpc(float amount)         { if (IsServer) return; health.events.OnOverkillEvent?.Invoke(amount); }
-        [ClientRpc] private void BroadcastHealHealthClientRpc(float amount)       { if (IsServer) return; health.events.OnHealHealthEvent?.Invoke(amount); }
-        [ClientRpc] private void BroadcastOverhealClientRpc(float amount)         { if (IsServer) return; health.events.OnOverhealEvent?.Invoke(amount); }
-        [ClientRpc] private void BroadcastChargeShieldClientRpc(float amount)     { if (IsServer) return; health.events.OnChargeShieldEvent?.Invoke(amount); }
-        [ClientRpc] private void BroadcastOverchargeShieldClientRpc(float amount) { if (IsServer) return; health.events.OnOverchargeShieldEvent?.Invoke(amount); }
-        [ClientRpc] private void BroadcastReviveClientRpc()                       { if (IsServer) return; health.events.OnReviveEvent?.Invoke(); }
-        [ClientRpc] private void BroadcastRegenHealthStartClientRpc()             { if (IsServer) return; health.events.OnRegenHealthStartEvent?.Invoke(); }
-        [ClientRpc] private void BroadcastRegenShieldStartClientRpc()             { if (IsServer) return; health.events.OnRegenShieldStartEvent?.Invoke(); }
-        [ClientRpc] private void BroadcastMaxHealthClientRpc()                    { if (IsServer) return; health.events.OnMaxHealthEvent?.Invoke(); }
-        [ClientRpc] private void BroadcastMaxShieldClientRpc()                    { if (IsServer) return; health.events.OnMaxShieldEvent?.Invoke(); }
+        [ClientRpc] private void BroadcastDamageClientRpc(float a)           { if (IsServer) return; health.events.OnDamageEvent?.Invoke(a); }
+        [ClientRpc] private void BroadcastDieClientRpc(float a)              { if (IsServer) return; health.events.OnDieEvent?.Invoke(a); }
+        [ClientRpc] private void BroadcastOverkillClientRpc(float a)         { if (IsServer) return; health.events.OnOverkillEvent?.Invoke(a); }
+        [ClientRpc] private void BroadcastHealHealthClientRpc(float a)       { if (IsServer) return; health.events.OnHealHealthEvent?.Invoke(a); }
+        [ClientRpc] private void BroadcastOverhealClientRpc(float a)         { if (IsServer) return; health.events.OnOverhealEvent?.Invoke(a); }
+        [ClientRpc] private void BroadcastChargeShieldClientRpc(float a)     { if (IsServer) return; health.events.OnChargeShieldEvent?.Invoke(a); }
+        [ClientRpc] private void BroadcastOverchargeShieldClientRpc(float a) { if (IsServer) return; health.events.OnOverchargeShieldEvent?.Invoke(a); }
+        [ClientRpc] private void BroadcastReviveClientRpc()                  { if (IsServer) return; health.events.OnReviveEvent?.Invoke(); }
+        [ClientRpc] private void BroadcastRegenHealthStartClientRpc()        { if (IsServer) return; health.events.OnRegenHealthStartEvent?.Invoke(); }
+        [ClientRpc] private void BroadcastRegenShieldStartClientRpc()        { if (IsServer) return; health.events.OnRegenShieldStartEvent?.Invoke(); }
+        [ClientRpc] private void BroadcastMaxHealthClientRpc()               { if (IsServer) return; health.events.OnMaxHealthEvent?.Invoke(); }
+        [ClientRpc] private void BroadcastMaxShieldClientRpc()               { if (IsServer) return; health.events.OnMaxShieldEvent?.Invoke(); }
 
         // ServerRpcs — called by any client, executed on the server.
-        [ServerRpc(RequireOwnership = false)]
-        public void DamageServerRpc(float amount) => health.Damage(amount);
-
-        [ServerRpc(RequireOwnership = false)]
-        public void HealHealthServerRpc(float amount) => health.HealHealth(amount);
-
-        [ServerRpc(RequireOwnership = false)]
-        public void ChargeShieldServerRpc(float amount) => health.ChargeShield(amount);
-
-        [ServerRpc(RequireOwnership = false)]
-        public void ReviveServerRpc() => health.Revive();
-
-        [ServerRpc(RequireOwnership = false)]
-        public void SetMaxHealthBonusServerRpc(float bonus) => MaxHealthBonus = bonus;
+        [ServerRpc(RequireOwnership = false)] public void DamageServerRpc(float amount)          => health.Damage(amount);
+        [ServerRpc(RequireOwnership = false)] public void HealHealthServerRpc(float amount)      => health.HealHealth(amount);
+        [ServerRpc(RequireOwnership = false)] public void ChargeShieldServerRpc(float amount)    => health.ChargeShield(amount);
+        [ServerRpc(RequireOwnership = false)] public void ReviveServerRpc()                      => health.Revive();
+        [ServerRpc(RequireOwnership = false)] public void SetMaxHealthBonusServerRpc(float bonus) => MaxHealthBonus = bonus;
     }
 }
 #endif
