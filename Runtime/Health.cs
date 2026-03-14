@@ -116,9 +116,12 @@ namespace Healthy
             if (IsDead || !healthData.Traits.HasShields)
                 return;
 
+            bool wasAtMaxShield = currentShield >= healthData.Traits.MaxShield;
             float shieldOverage = Mathf.Max(0, currentShield + amount - healthData.Traits.MaxShield);
             CurrentShield += amount;
             events.OnChargeShieldEvent?.Invoke(amount);
+            if (!wasAtMaxShield && currentShield >= healthData.Traits.MaxShield)
+                events.OnMaxShieldEvent?.Invoke();
             if (shieldOverage > 0)
                 events.OnOverchargeShieldEvent?.Invoke(shieldOverage);
         }
@@ -131,9 +134,12 @@ namespace Healthy
             if (IsDead)
                 return;
 
+            bool wasAtMaxHealth = currentHealth >= MaxHealth;
             float healthOverage = Mathf.Max(0, currentHealth + amount - MaxHealth);
             CurrentHealth += amount;
             events.OnHealHealthEvent?.Invoke(amount);
+            if (!wasAtMaxHealth && currentHealth >= MaxHealth)
+                events.OnMaxHealthEvent?.Invoke();
             if (healthOverage > 0)
                 events.OnOverhealEvent?.Invoke(healthOverage);
         }
@@ -183,6 +189,8 @@ namespace Healthy
                 CurrentShield += healthData.Traits.ShieldRegenRate * Time.deltaTime;
                 yield return new WaitForEndOfFrame();
             }
+
+            events.OnMaxShieldEvent?.Invoke();
         }
 
         private IEnumerator RegenHealthCoroutine(bool withDelay)
@@ -200,6 +208,8 @@ namespace Healthy
                 CurrentHealth += healthData.Traits.HealthRegenRate * Time.deltaTime;
                 yield return new WaitForEndOfFrame();
             }
+
+            events.OnMaxHealthEvent?.Invoke();
         }
     }
 }

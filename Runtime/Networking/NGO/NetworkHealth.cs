@@ -91,6 +91,8 @@ namespace Healthy.Networking.NGO
                 health.events.OnReviveEvent.AddListener(() => BroadcastReviveClientRpc());
                 health.events.OnRegenHealthStartEvent.AddListener(() => BroadcastRegenHealthStartClientRpc());
                 health.events.OnRegenShieldStartEvent.AddListener(() => BroadcastRegenShieldStartClientRpc());
+                health.events.OnMaxHealthEvent.AddListener(() => BroadcastMaxHealthClientRpc());
+                health.events.OnMaxShieldEvent.AddListener(() => BroadcastMaxShieldClientRpc());
             }
             else
             {
@@ -144,6 +146,8 @@ namespace Healthy.Networking.NGO
         [ClientRpc] private void BroadcastReviveClientRpc()                       { if (IsServer) return; health.events.OnReviveEvent?.Invoke(); }
         [ClientRpc] private void BroadcastRegenHealthStartClientRpc()             { if (IsServer) return; health.events.OnRegenHealthStartEvent?.Invoke(); }
         [ClientRpc] private void BroadcastRegenShieldStartClientRpc()             { if (IsServer) return; health.events.OnRegenShieldStartEvent?.Invoke(); }
+        [ClientRpc] private void BroadcastMaxHealthClientRpc()                    { if (IsServer) return; health.events.OnMaxHealthEvent?.Invoke(); }
+        [ClientRpc] private void BroadcastMaxShieldClientRpc()                    { if (IsServer) return; health.events.OnMaxShieldEvent?.Invoke(); }
 
         // ServerRpcs — called by any client, executed on the server.
         [ServerRpc(RequireOwnership = false)]

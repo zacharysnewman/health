@@ -80,6 +80,8 @@ namespace Healthy.Networking.Mirror
             health.events.OnReviveEvent.AddListener(() => RpcBroadcastRevive());
             health.events.OnRegenHealthStartEvent.AddListener(() => RpcBroadcastRegenHealthStart());
             health.events.OnRegenShieldStartEvent.AddListener(() => RpcBroadcastRegenShieldStart());
+            health.events.OnMaxHealthEvent.AddListener(() => RpcBroadcastMaxHealth());
+            health.events.OnMaxShieldEvent.AddListener(() => RpcBroadcastMaxShield());
         }
 
         public override void OnStartClient()
@@ -122,6 +124,8 @@ namespace Healthy.Networking.Mirror
         [ClientRpc] private void RpcBroadcastRevive()                       { if (isServer) return; health.events.OnReviveEvent?.Invoke(); }
         [ClientRpc] private void RpcBroadcastRegenHealthStart()             { if (isServer) return; health.events.OnRegenHealthStartEvent?.Invoke(); }
         [ClientRpc] private void RpcBroadcastRegenShieldStart()             { if (isServer) return; health.events.OnRegenShieldStartEvent?.Invoke(); }
+        [ClientRpc] private void RpcBroadcastMaxHealth()                    { if (isServer) return; health.events.OnMaxHealthEvent?.Invoke(); }
+        [ClientRpc] private void RpcBroadcastMaxShield()                    { if (isServer) return; health.events.OnMaxShieldEvent?.Invoke(); }
 
         // Commands — called by any client, executed on the server.
         [Command(requiresAuthority = false)]

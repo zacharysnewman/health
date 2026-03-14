@@ -83,6 +83,8 @@ namespace Healthy.Networking.Fusion
                 health.events.OnReviveEvent.AddListener(() => Rpc_BroadcastRevive());
                 health.events.OnRegenHealthStartEvent.AddListener(() => Rpc_BroadcastRegenHealthStart());
                 health.events.OnRegenShieldStartEvent.AddListener(() => Rpc_BroadcastRegenShieldStart());
+                health.events.OnMaxHealthEvent.AddListener(() => Rpc_BroadcastMaxHealth());
+                health.events.OnMaxShieldEvent.AddListener(() => Rpc_BroadcastMaxShield());
             }
             else
             {
@@ -120,6 +122,8 @@ namespace Healthy.Networking.Fusion
         [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)] private void Rpc_BroadcastRevive()                       => health.events.OnReviveEvent?.Invoke();
         [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)] private void Rpc_BroadcastRegenHealthStart()             => health.events.OnRegenHealthStartEvent?.Invoke();
         [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)] private void Rpc_BroadcastRegenShieldStart()             => health.events.OnRegenShieldStartEvent?.Invoke();
+        [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)] private void Rpc_BroadcastMaxHealth()                    => health.events.OnMaxHealthEvent?.Invoke();
+        [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)] private void Rpc_BroadcastMaxShield()                    => health.events.OnMaxShieldEvent?.Invoke();
 
         // RPCs — callable by any peer, executed on state authority.
         [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
