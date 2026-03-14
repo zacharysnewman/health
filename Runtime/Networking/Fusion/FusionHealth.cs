@@ -18,9 +18,12 @@ namespace Healthy.Networking.Fusion
     ///   3. Spawn the object via NetworkRunner.Spawn (required for [Networked] to work).
     ///   4. From non-authority peers, call Rpc_Damage / Rpc_HealHealth /
     ///      Rpc_ChargeShield / Rpc_Revive instead of calling Health methods directly.
+    ///   5. To change MaxHealthBonus at runtime (e.g. on level-up), call
+    ///      Rpc_SetMaxHealthBonus from a non-authority peer, or set MaxHealthBonus
+    ///      directly from state-authority code.
     /// </summary>
     [RequireComponent(typeof(Health))]
-    public class FusionHealth : NetworkBehaviour, IHealthReplicator
+    public class FusionHealth : NetworkBehaviour
     {
         private Health health;
 
@@ -33,32 +36,56 @@ namespace Healthy.Networking.Fusion
         [Networked, OnChangedRender(nameof(OnIsDeadChanged))]
         private NetworkBool SyncedIsDead { get; set; }
 
+        [Networked, OnChangedRender(nameof(OnMaxHealthBonusChanged))]
+        private float SyncedMaxHealthBonus { get; set; }
+
+        /// <summary>
+        /// State-authority setter for MaxHealthBonus. Propagates to all proxies automatically.
+        /// </summary>
+        public float MaxHealthBonus
+        {
+            get => health != null ? health.MaxHealthBonus : SyncedMaxHealthBonus;
+            set
+            {
+                if (!HasStateAuthority) return;
+                health.MaxHealthBonus = value;
+                SyncedMaxHealthBonus = value;
+            }
+        }
+
         public override void Spawned()
         {
             health = GetComponent<Health>();
 
             if (HasStateAuthority)
             {
-                // Seed [Networked] properties with the current state.
                 SyncedHealth = health.CurrentHealth;
                 SyncedShield = health.CurrentShield;
                 SyncedIsDead = health.IsDead;
+                SyncedMaxHealthBonus = health.MaxHealthBonus;
 
-                // Keep [Networked] properties in sync with core Health changes.
                 health.events.OnHealthChangeEvent.AddListener(value => SyncedHealth = value);
                 health.events.OnShieldChangeEvent.AddListener(value => SyncedShield = value);
                 health.events.OnDieEvent.AddListener(_ => SyncedIsDead = true);
                 health.events.OnReviveEvent.AddListener(() => SyncedIsDead = false);
             }
+            else
+            {
+                // Apply current state authority values immediately on spawn.
+                health.MaxHealthBonus = SyncedMaxHealthBonus;
+                health.CurrentHealth = SyncedHealth;
+                health.CurrentShield = SyncedShield;
+
+                // Stop the regen coroutines Health.Start() triggered locally —
+                // regen runs on state authority and replicates via SyncedHealth.
+                health.StopRegen();
+            }
         }
 
-        // IHealthReplicator — writes network values back to the local Health component.
-        public void SetHealth(float value) { if (health != null) health.CurrentHealth = value; }
-        public void SetShield(float value) { if (health != null) health.CurrentShield = value; }
-
         // OnChangedRender callbacks — called on proxies when [Networked] values change.
-        private void OnHealthChanged() => SetHealth(SyncedHealth);
-        private void OnShieldChanged() => SetShield(SyncedShield);
+        private void OnHealthChanged() => health.CurrentHealth = SyncedHealth;
+        private void OnShieldChanged() => health.CurrentShield = SyncedShield;
+        private void OnMaxHealthBonusChanged() => health.MaxHealthBonus = SyncedMaxHealthBonus;
 
         private void OnIsDeadChanged()
         {
@@ -81,6 +108,9 @@ namespace Healthy.Networking.Fusion
 
         [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
         public void Rpc_Revive() => health.Revive();
+
+        [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+        public void Rpc_SetMaxHealthBonus(float bonus) => MaxHealthBonus = bonus;
     }
 }
 #endif
