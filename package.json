@@ -17,6 +17,36 @@
       "displayName": "Example UI Usage",
       "description": "Includes a demo scene to showcase how to use it with an example UI.",
       "path": "Samples~/ExampleUIUsage"
+    },
+    {
+      "displayName": "Singleplayer - Player Health",
+      "description": "Demonstrates player health and shield with regen, overheal, death, and revive using TMP text labels.",
+      "path": "Samples~/Singleplayer/PlayerHealth"
+    },
+    {
+      "displayName": "Singleplayer - Environment Health",
+      "description": "Demonstrates health on a destructible object (crate/barrel) with no shield or regen using TMP text labels.",
+      "path": "Samples~/Singleplayer/EnvironmentHealth"
+    },
+    {
+      "displayName": "Singleplayer - NPC Health",
+      "description": "Demonstrates NPC health with shield bleed-through, regen interruption, and overcharge using TMP text labels.",
+      "path": "Samples~/Singleplayer/NPCHealth"
+    },
+    {
+      "displayName": "Multiplayer - NGO",
+      "description": "Demonstrates health integration with Netcode for GameObjects. Requires com.unity.netcode.gameobjects.",
+      "path": "Samples~/NGO"
+    },
+    {
+      "displayName": "Multiplayer - Mirror",
+      "description": "Demonstrates health integration with Mirror Networking. Requires Mirror and the HEALTH_MIRROR scripting define.",
+      "path": "Samples~/Mirror"
+    },
+    {
+      "displayName": "Multiplayer - Photon Fusion",
+      "description": "Demonstrates health integration with Photon Fusion. Requires Fusion and the HEALTH_FUSION scripting define.",
+      "path": "Samples~/Photon"
     }
   ]
 }

@@ -1,0 +1,20 @@
+{
+    "name": "Healthy.Networking.Mirror",
+    "rootNamespace": "Healthy.Networking.Mirror",
+    "references": [
+        "Healthy",
+        "Healthy.Networking",
+        "Mirror"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "HEALTH_MIRROR"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
