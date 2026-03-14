@@ -91,6 +91,12 @@ namespace Healthy.Networking.Fusion
                 health.CurrentHealth = SyncedHealth;
                 health.CurrentShield = SyncedShield;
 
+                // Fire OnDieEvent for late joiners who spawn into an already-dead state.
+                // OnIsDeadChanged is empty (broadcast RPCs handle live events), so we
+                // prime this initial visual state explicitly.
+                if (SyncedIsDead)
+                    health.events.OnDieEvent?.Invoke(0f);
+
                 // Stop the regen coroutines Health.Start() triggered locally —
                 // regen runs on state authority and replicates via SyncedHealth.
                 health.StopRegen();

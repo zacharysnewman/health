@@ -104,6 +104,12 @@ namespace Healthy.Networking.NGO
                 health.CurrentHealth = netHealth.Value;
                 health.CurrentShield = netShield.Value;
 
+                // Fire OnDieEvent for late joiners who spawn into an already-dead state.
+                // OnNetIsDeadChanged is empty (RPCs handle live events), so we prime this
+                // initial visual state explicitly.
+                if (netIsDead.Value)
+                    health.events.OnDieEvent?.Invoke(0f);
+
                 // Stop the regen coroutines Health.Start() triggered locally —
                 // regen runs on the server and replicates via netHealth.
                 health.StopRegen();

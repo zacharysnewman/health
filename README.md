@@ -123,21 +123,20 @@ GetComponent<NetworkHealth>().DamageServerRpc(25f);
 GetComponent<FusionHealth>().Rpc_Damage(25f);
 ```
 
-The server applies the call to the core `Health` component. State is replicated back to all clients automatically, and client-side `HealthEvents` fire normally so UI and audio hooks require no changes.
+The server applies the call to the core `Health` component. State and events are replicated to all clients, so UI, audio, and visual-effect hooks on `HealthEvents` work identically on remote players.
 
-### IHealthReplicator
+### What fires on clients
 
-An optional `IHealthReplicator` interface (`Healthy.Networking` assembly) is implemented by all adapters:
+All `HealthEvents` fire on every client, including the server/host:
 
-```csharp
-public interface IHealthReplicator
-{
-    void SetHealth(float value);
-    void SetShield(float value);
-}
-```
+| How it reaches clients | Events |
+|---|---|
+| NetworkVariable / SyncVar / `[Networked]` property | `OnHealthChangeEvent`, `OnHealthChangeNormalizedEvent`, `OnShieldChangeEvent`, `OnShieldChangeNormalizedEvent` |
+| Broadcast RPC (server → all clients) | `OnDamageEvent`, `OnDieEvent`, `OnOverkillEvent`, `OnHealHealthEvent`, `OnOverhealEvent`, `OnChargeShieldEvent`, `OnOverchargeShieldEvent`, `OnReviveEvent`, `OnRegenHealthStartEvent`, `OnRegenShieldStartEvent` |
 
-Reference it when you want framework-agnostic code that only needs to push values into a local `Health` component.
+**Late joiners:** clients who join while a player is already dead receive `OnDieEvent(0f)` immediately on spawn so death visuals (ragdolls, UI, etc.) initialize correctly. The damage amount is unavailable at that point, hence `0f`.
+
+**`OnDieEvent` amount:** carries the real damage amount for live kills. For late-joining clients initializing into a pre-existing dead state it is always `0f`.
 
 ## Samples
 

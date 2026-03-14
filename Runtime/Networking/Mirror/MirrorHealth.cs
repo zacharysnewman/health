@@ -93,6 +93,12 @@ namespace Healthy.Networking.Mirror
             health.CurrentHealth = syncedHealth;
             health.CurrentShield = syncedShield;
 
+            // Fire OnDieEvent for late joiners who spawn into an already-dead state.
+            // OnSyncedIsDeadChanged is empty (ClientRpcs handle live events), so we
+            // prime this initial visual state explicitly.
+            if (syncedIsDead)
+                health.events.OnDieEvent?.Invoke(0f);
+
             // Stop the regen coroutines Health.Start() triggered locally —
             // regen runs on the server and replicates via syncedHealth.
             health.StopRegen();
