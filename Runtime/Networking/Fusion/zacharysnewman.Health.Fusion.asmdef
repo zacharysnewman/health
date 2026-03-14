@@ -1,0 +1,20 @@
+{
+    "name": "Healthy.Networking.Fusion",
+    "rootNamespace": "Healthy.Networking.Fusion",
+    "references": [
+        "Healthy",
+        "Healthy.Networking",
+        "Fusion"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "HEALTH_FUSION"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

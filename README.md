@@ -80,6 +80,65 @@ Assign listeners in the Inspector or via code. All events are `UnityEvent<float>
 | `OnRegenHealthStartEvent` | _(none)_ | Health regen begins |
 | `OnRegenShieldStartEvent` | _(none)_ | Shield regen begins |
 
+## Networking Integration
+
+The core `Health` component has no networking dependencies and works standalone. Optional networking adapters live in `Runtime/Networking/` as separate assemblies that only compile when the corresponding framework is present.
+
+### Available adapters
+
+| Adapter | Class | Namespace | Framework |
+|---|---|---|---|
+| Mirror | `MirrorHealth` | `Healthy.Networking.Mirror` | [Mirror](https://mirror-networking.gitbook.io/) |
+| Netcode for GameObjects | `NetworkHealth` | `Healthy.Networking.NGO` | [Unity NGO](https://docs-multiplayer.unity3d.com/) |
+| Photon Fusion | `FusionHealth` | `Healthy.Networking.Fusion` | [Photon Fusion](https://doc.photonengine.com/fusion/) |
+
+### Setup
+
+**Netcode for GameObjects** — no extra steps. Installing `com.unity.netcode.gameobjects` via Package Manager automatically defines `HEALTH_NGO` and compiles the adapter.
+
+**Mirror / Photon Fusion** — after installing the framework, add the corresponding define to **Project Settings > Player > Scripting Define Symbols**:
+
+| Framework | Define symbol |
+|---|---|
+| Mirror | `HEALTH_MIRROR` |
+| Photon Fusion | `HEALTH_FUSION` |
+
+### Usage
+
+Add the adapter component alongside `Health` on the same GameObject (plus any component required by the framework, e.g. `NetworkIdentity` for Mirror or `NetworkObject` for NGO). The adapter is server-authoritative: instead of calling `Health` methods directly from clients, call the adapter's network method instead.
+
+**Mirror example**
+```csharp
+// Client-side — route through the Command instead of calling Health directly.
+GetComponent<MirrorHealth>().CmdDamage(25f);
+```
+
+**NGO example**
+```csharp
+GetComponent<NetworkHealth>().DamageServerRpc(25f);
+```
+
+**Fusion example**
+```csharp
+GetComponent<FusionHealth>().Rpc_Damage(25f);
+```
+
+The server applies the call to the core `Health` component. State is replicated back to all clients automatically, and client-side `HealthEvents` fire normally so UI and audio hooks require no changes.
+
+### IHealthReplicator
+
+An optional `IHealthReplicator` interface (`Healthy.Networking` assembly) is implemented by all adapters:
+
+```csharp
+public interface IHealthReplicator
+{
+    void SetHealth(float value);
+    void SetShield(float value);
+}
+```
+
+Reference it when you want framework-agnostic code that only needs to push values into a local `Health` component.
+
 ## Samples
 
 An **Example UI Usage** sample is included. Import it from the Package Manager to get a demo scene showing health and shield bars driven by `SetImageFill` and `SetText` helper scripts.

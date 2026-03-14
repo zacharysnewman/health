@@ -1,0 +1,26 @@
+{
+    "name": "Healthy.Networking.NGO",
+    "rootNamespace": "Healthy.Networking.NGO",
+    "references": [
+        "Healthy",
+        "Healthy.Networking",
+        "Unity.Netcode.Runtime"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "HEALTH_NGO"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.unity.netcode.gameobjects",
+            "expression": "",
+            "define": "HEALTH_NGO"
+        }
+    ],
+    "noEngineReferences": false
+}
