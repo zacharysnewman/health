@@ -12,6 +12,10 @@ namespace Healthy.Networking.NGO
     /// them to the core Health component. NetworkVariables replicate state to all
     /// clients so their local Health values stay in sync.
     ///
+    /// Semantic events (OnDamageEvent, OnDieEvent, OnHealHealthEvent, etc.) are
+    /// broadcast to all clients via ClientRpcs so effects like floating damage
+    /// numbers, death animations, and shield sounds work on remote players.
+    ///
     /// Setup:
     ///   1. Install com.unity.netcode.gameobjects — HEALTH_NGO is defined automatically.
     ///   2. Add Health, NetworkHealth, and NetworkObject to your networked GameObject.
@@ -76,6 +80,17 @@ namespace Healthy.Networking.NGO
                 health.events.OnShieldChangeEvent.AddListener(value => netShield.Value = value);
                 health.events.OnDieEvent.AddListener(_ => netIsDead.Value = true);
                 health.events.OnReviveEvent.AddListener(() => netIsDead.Value = false);
+
+                health.events.OnDamageEvent.AddListener(amount => BroadcastDamageClientRpc(amount));
+                health.events.OnDieEvent.AddListener(amount => BroadcastDieClientRpc(amount));
+                health.events.OnOverkillEvent.AddListener(amount => BroadcastOverkillClientRpc(amount));
+                health.events.OnHealHealthEvent.AddListener(amount => BroadcastHealHealthClientRpc(amount));
+                health.events.OnOverhealEvent.AddListener(amount => BroadcastOverhealClientRpc(amount));
+                health.events.OnChargeShieldEvent.AddListener(amount => BroadcastChargeShieldClientRpc(amount));
+                health.events.OnOverchargeShieldEvent.AddListener(amount => BroadcastOverchargeShieldClientRpc(amount));
+                health.events.OnReviveEvent.AddListener(() => BroadcastReviveClientRpc());
+                health.events.OnRegenHealthStartEvent.AddListener(() => BroadcastRegenHealthStartClientRpc());
+                health.events.OnRegenShieldStartEvent.AddListener(() => BroadcastRegenShieldStartClientRpc());
             }
             else
             {
@@ -109,15 +124,20 @@ namespace Healthy.Networking.NGO
         private void OnNetHealthChanged(float _, float newValue) => health.CurrentHealth = newValue;
         private void OnNetShieldChanged(float _, float newValue) => health.CurrentShield = newValue;
         private void OnNetMaxHealthBonusChanged(float _, float newValue) => health.MaxHealthBonus = newValue;
+        private void OnNetIsDeadChanged(bool _, bool newValue) { } // State sync only — events come via ClientRpcs.
 
-        private void OnNetIsDeadChanged(bool _, bool newValue)
-        {
-            if (health == null) return;
-            if (newValue)
-                health.events.OnDieEvent?.Invoke(0f);
-            else
-                health.events.OnReviveEvent?.Invoke();
-        }
+        // ClientRpcs — broadcast semantic events to all non-server clients.
+        // IsServer guard prevents double-firing on the host, which already ran the event locally.
+        [ClientRpc] private void BroadcastDamageClientRpc(float amount)           { if (IsServer) return; health.events.OnDamageEvent?.Invoke(amount); }
+        [ClientRpc] private void BroadcastDieClientRpc(float amount)              { if (IsServer) return; health.events.OnDieEvent?.Invoke(amount); }
+        [ClientRpc] private void BroadcastOverkillClientRpc(float amount)         { if (IsServer) return; health.events.OnOverkillEvent?.Invoke(amount); }
+        [ClientRpc] private void BroadcastHealHealthClientRpc(float amount)       { if (IsServer) return; health.events.OnHealHealthEvent?.Invoke(amount); }
+        [ClientRpc] private void BroadcastOverhealClientRpc(float amount)         { if (IsServer) return; health.events.OnOverhealEvent?.Invoke(amount); }
+        [ClientRpc] private void BroadcastChargeShieldClientRpc(float amount)     { if (IsServer) return; health.events.OnChargeShieldEvent?.Invoke(amount); }
+        [ClientRpc] private void BroadcastOverchargeShieldClientRpc(float amount) { if (IsServer) return; health.events.OnOverchargeShieldEvent?.Invoke(amount); }
+        [ClientRpc] private void BroadcastReviveClientRpc()                       { if (IsServer) return; health.events.OnReviveEvent?.Invoke(); }
+        [ClientRpc] private void BroadcastRegenHealthStartClientRpc()             { if (IsServer) return; health.events.OnRegenHealthStartEvent?.Invoke(); }
+        [ClientRpc] private void BroadcastRegenShieldStartClientRpc()             { if (IsServer) return; health.events.OnRegenShieldStartEvent?.Invoke(); }
 
         // ServerRpcs — called by any client, executed on the server.
         [ServerRpc(RequireOwnership = false)]

@@ -12,6 +12,10 @@ namespace Healthy.Networking.Fusion
     /// them to the core Health component. [Networked] properties replicate state to all
     /// peers, with OnChangedRender callbacks keeping local Health values in sync.
     ///
+    /// Semantic events (OnDamageEvent, OnDieEvent, OnHealHealthEvent, etc.) are
+    /// broadcast to all proxies via RPCs so effects like floating damage numbers,
+    /// death animations, and shield sounds work on remote players.
+    ///
     /// Setup:
     ///   1. Install Photon Fusion and add HEALTH_FUSION to Project Settings > Player > Scripting Define Symbols.
     ///   2. Add Health and FusionHealth to your networked GameObject.
@@ -68,6 +72,17 @@ namespace Healthy.Networking.Fusion
                 health.events.OnShieldChangeEvent.AddListener(value => SyncedShield = value);
                 health.events.OnDieEvent.AddListener(_ => SyncedIsDead = true);
                 health.events.OnReviveEvent.AddListener(() => SyncedIsDead = false);
+
+                health.events.OnDamageEvent.AddListener(amount => Rpc_BroadcastDamage(amount));
+                health.events.OnDieEvent.AddListener(amount => Rpc_BroadcastDie(amount));
+                health.events.OnOverkillEvent.AddListener(amount => Rpc_BroadcastOverkill(amount));
+                health.events.OnHealHealthEvent.AddListener(amount => Rpc_BroadcastHealHealth(amount));
+                health.events.OnOverhealEvent.AddListener(amount => Rpc_BroadcastOverheal(amount));
+                health.events.OnChargeShieldEvent.AddListener(amount => Rpc_BroadcastChargeShield(amount));
+                health.events.OnOverchargeShieldEvent.AddListener(amount => Rpc_BroadcastOverchargeShield(amount));
+                health.events.OnReviveEvent.AddListener(() => Rpc_BroadcastRevive());
+                health.events.OnRegenHealthStartEvent.AddListener(() => Rpc_BroadcastRegenHealthStart());
+                health.events.OnRegenShieldStartEvent.AddListener(() => Rpc_BroadcastRegenShieldStart());
             }
             else
             {
@@ -86,15 +101,19 @@ namespace Healthy.Networking.Fusion
         private void OnHealthChanged() => health.CurrentHealth = SyncedHealth;
         private void OnShieldChanged() => health.CurrentShield = SyncedShield;
         private void OnMaxHealthBonusChanged() => health.MaxHealthBonus = SyncedMaxHealthBonus;
+        private void OnIsDeadChanged() { } // State sync only — events come via broadcast RPCs.
 
-        private void OnIsDeadChanged()
-        {
-            if (health == null) return;
-            if (SyncedIsDead)
-                health.events.OnDieEvent?.Invoke(0f);
-            else
-                health.events.OnReviveEvent?.Invoke();
-        }
+        // Broadcast RPCs — sent from state authority to proxies only, so no double-fire guard needed.
+        [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)] private void Rpc_BroadcastDamage(float amount)           => health.events.OnDamageEvent?.Invoke(amount);
+        [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)] private void Rpc_BroadcastDie(float amount)              => health.events.OnDieEvent?.Invoke(amount);
+        [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)] private void Rpc_BroadcastOverkill(float amount)         => health.events.OnOverkillEvent?.Invoke(amount);
+        [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)] private void Rpc_BroadcastHealHealth(float amount)       => health.events.OnHealHealthEvent?.Invoke(amount);
+        [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)] private void Rpc_BroadcastOverheal(float amount)         => health.events.OnOverhealEvent?.Invoke(amount);
+        [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)] private void Rpc_BroadcastChargeShield(float amount)     => health.events.OnChargeShieldEvent?.Invoke(amount);
+        [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)] private void Rpc_BroadcastOverchargeShield(float amount) => health.events.OnOverchargeShieldEvent?.Invoke(amount);
+        [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)] private void Rpc_BroadcastRevive()                       => health.events.OnReviveEvent?.Invoke();
+        [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)] private void Rpc_BroadcastRegenHealthStart()             => health.events.OnRegenHealthStartEvent?.Invoke();
+        [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)] private void Rpc_BroadcastRegenShieldStart()             => health.events.OnRegenShieldStartEvent?.Invoke();
 
         // RPCs — callable by any peer, executed on state authority.
         [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
