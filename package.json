@@ -1,6 +1,6 @@
 {
   "name": "com.zacharysnewman.health",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "displayName": "Health",
   "description": "Provides basic health and shield management for a project.",
   "keywords": [

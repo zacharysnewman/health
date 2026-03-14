@@ -1,3 +1,19 @@
+# [1.3.0](https://github.com/zacharysnewman/health/compare/v1.2.0...v1.3.0) (2026-03-14)
+
+
+### Bug Fixes
+
+* fire OnDieEvent for late joiners and document client-side events ([5ce88f0](https://github.com/zacharysnewman/health/commit/5ce88f0613b398bf7ad77fcb865264071049b3bd))
+
+
+### Features
+
+* add optional networking integration adapters for Mirror, NGO, and Photon Fusion ([d4e2650](https://github.com/zacharysnewman/health/commit/d4e26501504af4b046e8fac8020ea105c0d3e2fc))
+* add singleplayer and multiplayer samples ([96b3e13](https://github.com/zacharysnewman/health/commit/96b3e13d1b463124fca2586eea7e52ab8ebd94c2))
+* broadcast semantic health events to all clients ([9ee3775](https://github.com/zacharysnewman/health/commit/9ee3775832756693fe2180ff8bc2ca384dfe8d18))
+* implement OnMaxHealthEvent and OnMaxShieldEvent ([b5fc9bf](https://github.com/zacharysnewman/health/commit/b5fc9bf327b2762704bc22ccd135ee5df20740e2))
+* replicate MaxHealthBonus across all networking adapters ([01711d4](https://github.com/zacharysnewman/health/commit/01711d4a6f72175f0425320e61c09edfddcc95ab))
+
 # [1.2.0](https://github.com/zacharysnewman/health/compare/v1.1.0...v1.2.0) (2026-03-04)
 
 
