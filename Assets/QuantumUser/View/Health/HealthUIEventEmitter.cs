@@ -1,3 +1,4 @@
+#if HEALTH_QUANTUM
 // ────────────────────────────────────────────────────────────────────────────
 // HealthUIEventEmitter.cs  —  Quantum.Unity  (View assembly)
 //
@@ -216,3 +217,5 @@ namespace Quantum
         }
     }
 }
+
+#endif

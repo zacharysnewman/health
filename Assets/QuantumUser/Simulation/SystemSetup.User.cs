@@ -1,3 +1,4 @@
+#if HEALTH_QUANTUM
 // ────────────────────────────────────────────────────────────────────────────
 // SystemSetup.User.cs  —  Quantum.Simulation
 //
@@ -29,3 +30,5 @@ namespace Quantum
         }
     }
 }
+
+#endif
