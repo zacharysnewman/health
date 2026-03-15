@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/zacharysnewman/health/compare/v1.3.0...v1.4.0) (2026-03-15)
+
+
+### Features
+
+* add Quantum 3 port of health system ([d2b63df](https://github.com/zacharysnewman/health/commit/d2b63df42296058b8ba91c987d79268f12d40838))
+
 # [1.3.0](https://github.com/zacharysnewman/health/compare/v1.2.0...v1.3.0) (2026-03-14)
 
 
