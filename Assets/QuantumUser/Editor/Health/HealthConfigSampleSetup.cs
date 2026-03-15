@@ -23,7 +23,7 @@
 //   RegenTrigger      = HealthThenShield
 // ────────────────────────────────────────────────────────────────────────────
 
-#if UNITY_EDITOR
+#if HEALTH_QUANTUM && UNITY_EDITOR
 using UnityEditor;
 using UnityEngine;
 

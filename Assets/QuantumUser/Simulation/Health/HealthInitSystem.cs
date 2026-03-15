@@ -1,3 +1,4 @@
+#if HEALTH_QUANTUM
 // ────────────────────────────────────────────────────────────────────────────
 // HealthInitSystem.cs  —  Quantum.Simulation  (no UnityEngine references)
 //
@@ -41,3 +42,5 @@ namespace Quantum
         }
     }
 }
+
+#endif

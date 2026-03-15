@@ -91,17 +91,21 @@ The core `Health` component has no networking dependencies and works standalone.
 | Mirror | `MirrorHealth` | `Healthy.Networking.Mirror` | [Mirror](https://mirror-networking.gitbook.io/) |
 | Netcode for GameObjects | `NetworkHealth` | `Healthy.Networking.NGO` | [Unity NGO](https://docs-multiplayer.unity3d.com/) |
 | Photon Fusion | `FusionHealth` | `Healthy.Networking.Fusion` | [Photon Fusion](https://doc.photonengine.com/fusion/) |
+| Photon Quantum 3 | `HealthSystem` / `HealthView` / `HealthUIEventEmitter` | `Quantum` | [Photon Quantum 3](https://doc.photonengine.com/quantum/) |
 
 ### Setup
 
 **Netcode for GameObjects** — no extra steps. Installing `com.unity.netcode.gameobjects` via Package Manager automatically defines `HEALTH_NGO` and compiles the adapter.
 
-**Mirror / Photon Fusion** — after installing the framework, add the corresponding define to **Project Settings > Player > Scripting Define Symbols**:
+**Mirror / Photon Fusion / Photon Quantum 3** — after installing the framework, add the corresponding define to **Project Settings > Player > Scripting Define Symbols**:
 
 | Framework | Define symbol |
 |---|---|
 | Mirror | `HEALTH_MIRROR` |
 | Photon Fusion | `HEALTH_FUSION` |
+| Photon Quantum 3 | `HEALTH_QUANTUM` |
+
+**Photon Quantum 3** is a complete deterministic multiplayer port rather than an adapter — it is a separate, parallel implementation of the health system that runs inside the Quantum simulation. After adding `HEALTH_QUANTUM`, run **Quantum > Bake Assets** and add `HealthInitSystem` and `HealthSystem` to your `DeterministicSystemSetup` (or use the provided `SystemSetup.User.cs`). See `Assets/QuantumUser/Health/Sample/README.md` for full wiring instructions.
 
 ### Usage
 

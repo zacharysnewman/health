@@ -1,3 +1,4 @@
+#if HEALTH_QUANTUM
 // ────────────────────────────────────────────────────────────────────────────
 // HealthConfig.cs  —  Quantum.Simulation  (no UnityEngine references)
 //
@@ -65,3 +66,5 @@ namespace Quantum
         public RegenTrigger RegenTrigger = RegenTrigger.HealthThenShield;
     }
 }
+
+#endif

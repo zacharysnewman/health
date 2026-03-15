@@ -1,3 +1,4 @@
+#if HEALTH_QUANTUM
 // ────────────────────────────────────────────────────────────────────────────
 // HealthView.cs  —  Quantum.Unity  (View assembly)
 //
@@ -99,3 +100,5 @@ namespace Quantum
         }
     }
 }
+
+#endif
