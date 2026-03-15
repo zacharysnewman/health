@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/zacharysnewman/health/compare/v1.4.0...v1.4.1) (2026-03-15)
+
+
+### Bug Fixes
+
+* add #if HEALTH_QUANTUM compiler guards to all Quantum port files ([699273d](https://github.com/zacharysnewman/health/commit/699273d82c216e526ba358e67a2ae021ad8b3cf0))
+
 # [1.4.0](https://github.com/zacharysnewman/health/compare/v1.3.0...v1.4.0) (2026-03-15)
 
 

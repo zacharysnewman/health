@@ -1,6 +1,6 @@
 {
   "name": "com.zacharysnewman.health",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "displayName": "Health",
   "description": "Provides basic health and shield management for a project. Includes networking adapters for NGO, Mirror, and Photon Fusion, plus a full Photon Quantum 3 port (requires HEALTH_QUANTUM scripting define).",
   "keywords": [
