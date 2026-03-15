@@ -1,0 +1,193 @@
+// ────────────────────────────────────────────────────────────────────────────
+// Health.qtn
+// Quantum 3 port of the Healthy health system.
+// All types, signals, and events for the health simulation live here.
+// ────────────────────────────────────────────────────────────────────────────
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+// Controls which pool regenerates first and whether they run concurrently.
+// Mirrors Healthy.RegenTrigger exactly.
+enum RegenTrigger : Byte
+{
+    HealthThenShield = 0,
+    ShieldThenHealth = 1,
+    HealthAndShield  = 2
+}
+
+// ---------------------------------------------------------------------------
+// Asset declaration
+// ---------------------------------------------------------------------------
+
+// Configuration data (replaces HealthData + HealthTraits ScriptableObject).
+// Implementation body is in HealthConfig.cs.
+asset HealthConfig;
+
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
+
+component HealthComponent
+{
+    // Config reference — set on the EntityPrototype in the editor.
+    asset_ref<HealthConfig> Config;
+
+    // Runtime state — mirrors Health.cs private fields.
+    FP   CurrentHealth;
+    FP   CurrentShield;
+    bool IsDead;
+
+    // Additive max-health modifier.  Other systems write this directly.
+    // Mirrors Health.MaxHealthBonus (public field, default 0).
+    FP MaxHealthBonus;
+
+    // ── Regeneration state machine ──────────────────────────────────────────
+    // Replaces Unity coroutines with per-tick accumulators.
+
+    // Health regen delay is counting down.
+    bool HealthRegenDelayActive;
+    // Remaining seconds on the health regen delay.
+    FP   HealthRegenDelayTimer;
+    // Health is actively ticking upward.
+    bool IsHealthRegenerating;
+
+    // Shield regen delay is counting down.
+    bool ShieldRegenDelayActive;
+    // Remaining seconds on the shield regen delay.
+    FP   ShieldRegenDelayTimer;
+    // Shield is actively ticking upward.
+    bool IsShieldRegenerating;
+}
+
+// ---------------------------------------------------------------------------
+// Signals  (simulation → simulation, any system can call these)
+// ---------------------------------------------------------------------------
+
+// Apply damage to an entity.  Mirrors Health.Damage(float).
+// Negative values are rejected with a Log.Warn.
+signal OnHealthDamage(entity_ref entity, FP amount);
+
+// Heal health on an entity.  Mirrors Health.HealHealth(float).
+signal OnHealthHeal(entity_ref entity, FP amount);
+
+// Charge (add to) the shield of an entity.  Mirrors Health.ChargeShield(float).
+signal OnHealthChargeShield(entity_ref entity, FP amount);
+
+// Revive a dead entity.  Unified form of Health.Revive() overloads.
+// healthPercent and shieldPercent are clamped to [0,1] internally.
+// Full revive  → healthPercent = 1, shieldPercent = 0  (original Revive())
+// Partial      → any percent pair
+// Absolute     → divide by MaxHealth / MaxShield before calling
+signal OnHealthRevive(entity_ref entity, FP healthPercent, FP shieldPercent);
+
+// ---------------------------------------------------------------------------
+// Synced events  (confirmed state transitions — reliable, no rollback)
+// ---------------------------------------------------------------------------
+
+// Entity health reached zero and it is now dead.
+// Mirrors Health.events.OnDieEvent.
+synced event HealthDied
+{
+    entity_ref Entity;
+    FP         KillingBlow;
+}
+
+// Dead entity was successfully revived.
+// Mirrors Health.events.OnReviveEvent.
+synced event HealthRevived
+{
+    entity_ref Entity;
+}
+
+// ---------------------------------------------------------------------------
+// Plain events  (speculative, view-layer — may roll back on misprediction)
+// ---------------------------------------------------------------------------
+
+// Fired every time CurrentHealth changes (set, heal, damage, regen).
+// Carries both absolute and max so the view can compute the ratio.
+// Replaces OnHealthChangeEvent + OnHealthChangeNormalizedEvent.
+event HealthChanged
+{
+    entity_ref Entity;
+    FP         CurrentHealth;
+    FP         MaxHealth;
+}
+
+// Fired every time CurrentShield changes.
+// Replaces OnShieldChangeEvent + OnShieldChangeNormalizedEvent.
+event ShieldChanged
+{
+    entity_ref Entity;
+    FP         CurrentShield;
+    FP         MaxShield;
+}
+
+// Non-lethal damage was applied.  Mirrors OnDamageEvent.
+event HealthDamaged
+{
+    entity_ref Entity;
+    FP         Amount;
+}
+
+// Damage was received while already dead.  Mirrors OnOverkillEvent.
+event HealthOverkill
+{
+    entity_ref Entity;
+    FP         Amount;
+}
+
+// Health was healed.  Mirrors OnHealHealthEvent.
+event HealthHealed
+{
+    entity_ref Entity;
+    FP         Amount;
+}
+
+// Health reached MaxHealth (from heal or regen).  Mirrors OnMaxHealthEvent.
+event HealthMaxReached
+{
+    entity_ref Entity;
+}
+
+// Heal would have exceeded MaxHealth.  Mirrors OnOverhealEvent.
+event HealthOverhealed
+{
+    entity_ref Entity;
+    FP         Overage;
+}
+
+// Shield was charged.  Mirrors OnChargeShieldEvent.
+event ShieldCharged
+{
+    entity_ref Entity;
+    FP         Amount;
+}
+
+// Shield reached MaxShield (from charge or regen).  Mirrors OnMaxShieldEvent.
+event ShieldMaxReached
+{
+    entity_ref Entity;
+}
+
+// Shield charge would have exceeded MaxShield.  Mirrors OnOverchargeShieldEvent.
+event ShieldOvercharged
+{
+    entity_ref Entity;
+    FP         Overage;
+}
+
+// Health regeneration loop has begun (after any delay).
+// Mirrors OnRegenHealthStartEvent.
+event HealthRegenStarted
+{
+    entity_ref Entity;
+}
+
+// Shield regeneration loop has begun (after any delay).
+// Mirrors OnRegenShieldStartEvent.
+event ShieldRegenStarted
+{
+    entity_ref Entity;
+}

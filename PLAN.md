@@ -245,9 +245,9 @@ to Quantum **events** (not signals), consumed by the View script.
 | Original UnityEvent | Quantum Event | Type | Payload |
 |--------------------|---------------|------|---------|
 | `OnHealthChangeEvent` | `event HealthChanged` | plain | `entity_ref Entity; FP CurrentHealth; FP MaxHealth` |
-| `OnHealthChangeNormalizedEvent` | *(folded into HealthChanged — view computes ratio)* | — | — |
+| `OnHealthChangeNormalizedEvent` | *(carried in HealthChanged payload — see HealthUIEventEmitter)* | — | — |
 | `OnShieldChangeEvent` | `event ShieldChanged` | plain | `entity_ref Entity; FP CurrentShield; FP MaxShield` |
-| `OnShieldChangeNormalizedEvent` | *(folded into ShieldChanged)* | — | — |
+| `OnShieldChangeNormalizedEvent` | *(carried in ShieldChanged payload — see HealthUIEventEmitter)* | — | — |
 | `OnDamageEvent` | `event HealthDamaged` | plain | `entity_ref Entity; FP Amount` |
 | `OnDieEvent` | `synced event HealthDied` | synced | `entity_ref Entity; FP KillingBlow` |
 | `OnOverkillEvent` | `event HealthOverkill` | plain | `entity_ref Entity; FP Amount` |
@@ -273,14 +273,28 @@ events; the view computes `current / max` from the payload of `HealthChanged`
 
 ### View MonoBehaviour → QuantumEntityViewComponent
 
-| Original | Quantum |
-|----------|---------|
-| `PlayerHealthLabel.cs` (demo) | `HealthView.cs` — `QuantumEntityViewComponent` |
+Two view scripts are generated:
 
-`HealthView` subscribes to all Quantum events above, plus polls
-`VerifiedFrame` in `OnUpdateView()` for continuous bar updates. It exposes
-`[SerializeField]` references for TMP_Text labels and Image fill bars,
-mirroring the sample UI setup in the original.
+**`HealthView.cs`** — `QuantumEntityViewComponent`
+Polls `VerifiedFrame` in `OnUpdateView()` for continuous bar/text updates.
+Subscribes to synced events (`HealthDied`, `HealthRevived`) for confirmed
+reactions (VFX, animation triggers). Exposes `[SerializeField]` references for
+TMP_Text labels and Image fill bars.
+
+**`HealthUIEventEmitter.cs`** — `QuantumEntityViewComponent`
+Bridges all Quantum simulation events to `UnityEvent<T>` fields wirable
+in the Unity inspector. Exposes:
+- `UnityEvent<float>` for absolute health/shield values
+- `UnityEvent<float>` for normalized (0–1) health/shield values (ratio computed
+  from `CurrentHealth / MaxHealth` payload, not a separate simulation event)
+- `UnityEvent<string>` for pre-formatted text (rounded integer)
+- `UnityEvent` / `UnityEvent<float>` for all status events (died, revived,
+  max health, overheal, damage, heal, regen start, etc.)
+
+This component allows designers to wire Image.fillAmount, TMP_Text, Animator
+parameters, and AudioSource triggers directly in the inspector without any
+additional code, equivalent to the original `SetImageFill.cs` / `SetText.cs`
+sample helpers but integrated and self-contained.
 
 ---
 
@@ -307,6 +321,7 @@ mirroring the sample UI setup in the original.
 | 3d | `Assets/QuantumUser/Simulation/Health/HealthInitSystem.cs` | Quantum.Simulation |
 | 3e | `Assets/QuantumUser/Simulation/SystemSetup.User.cs` | Quantum.Simulation |
 | 3f | `Assets/QuantumUser/View/Health/HealthView.cs` | Quantum.Unity |
+| 3f | `Assets/QuantumUser/View/Health/HealthUIEventEmitter.cs` | Quantum.Unity |
 | 3g | `Assets/QuantumUser/Editor/Health/HealthConfigSampleSetup.cs` | Quantum.Unity.Editor |
 | 3g | `Assets/QuantumUser/Health/Sample/README.md` | — |
 
