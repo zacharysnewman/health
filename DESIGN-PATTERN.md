@@ -110,7 +110,7 @@ Value events fire on every mutation including regen ticks. Semantic events fire 
 External caller
   │
   ▼
-Health.Damage(25)
+Health.TakeDamage(info)
   │
   ├─► HealthUtils.CalculateDamageSplit()   [pure function, no side effects]
   │     returns (shieldRemaining, healthRemaining)
@@ -150,7 +150,7 @@ A separate `NetworkBehaviour` component sits alongside the core `Health` compone
 
 **On the server:**
 1. Commands arrive via `ServerRpc` from clients.
-2. Server calls the core command API (`health.Damage(amount)`).
+2. Server calls the core command API (`health.TakeDamage(info)`).
 3. Core fires events normally.
 4. The adapter listens to those events and does two things:
    - Writes the new value to a `NetworkVariable` (state replication — continuous)
@@ -168,7 +168,7 @@ A separate `NetworkBehaviour` component sits alongside the core `Health` compone
 [Client] DamageServerRpc(25)
   │
   ▼
-[Server] health.Damage(25)
+[Server] health.TakeDamage(info)
   ├─► core events fire (server-local UI updates immediately)
   ├─► OnHealthChangeEvent → netHealth.Value = newValue   [NetworkVariable → all clients]
   └─► OnDamageEvent       → BroadcastDamageClientRpc()  [ClientRpc → all clients]

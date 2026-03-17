@@ -65,7 +65,7 @@ component HealthComponent
 // Signals  (simulation → simulation, any system can call these)
 // ---------------------------------------------------------------------------
 
-// Apply damage to an entity.  Mirrors Health.Damage(float).
+// Apply damage to an entity.  Mirrors Health.TakeDamage(DamageInfo).
 // Negative values are rejected with a Log.Warn.
 signal OnHealthDamage(entity_ref entity, FP amount);
 

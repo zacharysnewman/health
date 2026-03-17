@@ -7,7 +7,7 @@ public class EnvironmentHealthDemoInput : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space)) health.Damage(25);
+        if (Input.GetKeyDown(KeyCode.Space)) health.TakeDamage(new DamageInfo { Amount = 25 });
         if (Input.GetKeyDown(KeyCode.R)) health.Revive();
     }
 }

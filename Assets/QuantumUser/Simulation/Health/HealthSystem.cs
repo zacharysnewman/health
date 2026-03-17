@@ -6,7 +6,7 @@
 //
 // Responsibilities:
 //   • Per-tick regeneration state machine (replaces Unity coroutines)
-//   • ISignalOnHealthDamage   → Health.Damage(float)
+//   • ISignalOnHealthDamage   → Health.TakeDamage(DamageInfo)
 //   • ISignalOnHealthHeal     → Health.HealHealth(float)
 //   • ISignalOnHealthChargeShield → Health.ChargeShield(float)
 //   • ISignalOnHealthRevive   → Health.Revive() overloads (unified)
@@ -44,7 +44,7 @@ namespace Quantum
         }
 
         // ── Signal: Damage ────────────────────────────────────────────────────
-        // Mirrors Health.Damage(float amount)
+        // Mirrors Health.TakeDamage(DamageInfo)
 
         public void OnHealthDamage(Frame f, EntityRef entity, FP amount)
         {

@@ -105,7 +105,7 @@ Other simulation systems dispatch these via `f.Signals.*`:
 
 | Signal | Equivalent original method |
 |--------|---------------------------|
-| `f.Signals.OnHealthDamage(entity, amount)` | `Health.Damage(float)` |
+| `f.Signals.OnHealthDamage(entity, amount)` | `Health.TakeDamage(DamageInfo)` |
 | `f.Signals.OnHealthHeal(entity, amount)` | `Health.HealHealth(float)` |
 | `f.Signals.OnHealthChargeShield(entity, amount)` | `Health.ChargeShield(float)` |
 | `f.Signals.OnHealthRevive(entity, healthPct, shieldPct)` | `Health.Revive(...)` overloads |

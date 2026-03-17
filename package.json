@@ -11,6 +11,9 @@
     "name": "zacharysnewman",
     "url": "https://github.com/zacharysnewman"
   },
+  "dependencies": {
+    "com.zacharysnewman.combat-contracts": "https://github.com/zacharysnewman/combat-contracts.git#v1.0.0"
+  },
   "type": "library",
   "samples": [
     {

@@ -1,7 +1,7 @@
 {
     "name": "Healthy",
     "rootNamespace": "",
-    "references": [],
+    "references": ["zacharysnewman.CombatContracts"],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

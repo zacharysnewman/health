@@ -169,7 +169,7 @@ namespace Healthy.Networking.Fusion
         [Rpc(RpcSources.StateAuthority, RpcTargets.Proxies)] private void Rpc_BroadcastMaxShield()               => health.events.OnMaxShieldEvent?.Invoke();
 
         // RPCs — callable by any peer, executed on state authority.
-        [Rpc(RpcSources.All, RpcTargets.StateAuthority)] public void Rpc_Damage(float amount)           => health.Damage(amount);
+        [Rpc(RpcSources.All, RpcTargets.StateAuthority)] public void Rpc_Damage(float amount)           => health.TakeDamage(new DamageInfo { Amount = amount });
         [Rpc(RpcSources.All, RpcTargets.StateAuthority)] public void Rpc_HealHealth(float amount)       => health.HealHealth(amount);
         [Rpc(RpcSources.All, RpcTargets.StateAuthority)] public void Rpc_ChargeShield(float amount)     => health.ChargeShield(amount);
         [Rpc(RpcSources.All, RpcTargets.StateAuthority)] public void Rpc_Revive()                       => health.Revive();

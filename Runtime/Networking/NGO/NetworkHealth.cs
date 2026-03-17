@@ -191,7 +191,7 @@ namespace Healthy.Networking.NGO
         [ClientRpc] private void BroadcastMaxShieldClientRpc()               { if (IsServer) return; health.events.OnMaxShieldEvent?.Invoke(); }
 
         // ServerRpcs — called by any client, executed on the server.
-        [ServerRpc(RequireOwnership = false)] public void DamageServerRpc(float amount)          => health.Damage(amount);
+        [ServerRpc(RequireOwnership = false)] public void DamageServerRpc(float amount)          => health.TakeDamage(new DamageInfo { Amount = amount });
         [ServerRpc(RequireOwnership = false)] public void HealHealthServerRpc(float amount)      => health.HealHealth(amount);
         [ServerRpc(RequireOwnership = false)] public void ChargeShieldServerRpc(float amount)    => health.ChargeShield(amount);
         [ServerRpc(RequireOwnership = false)] public void ReviveServerRpc()                      => health.Revive();

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Healthy
 {
-    public class Health : MonoBehaviour
+    public class Health : MonoBehaviour, IDamageable
     {
         private float currentHealth;
         private float currentShield;
@@ -80,31 +80,31 @@ namespace Healthy
             events.OnReviveEvent?.Invoke();
         }
 
-        public void Damage(float amount)
+        public void TakeDamage(DamageInfo info)
         {
-            if (amount < 0)
+            if (info.Amount < 0)
                 throw new ArgumentException("Damage value cannot be negative");
 
             if (IsDead)
             {
-                events.OnOverkillEvent?.Invoke(amount);
+                events.OnOverkillEvent?.Invoke(info.Amount);
                 return;
             }
 
             StopRegen();
 
-            (CurrentShield, CurrentHealth) = HealthUtils.CalculateDamageSplit(amount, CurrentShield, CurrentHealth, healthData.Traits.ShieldBleedThrough);
+            (CurrentShield, CurrentHealth) = HealthUtils.CalculateDamageSplit(info.Amount, CurrentShield, CurrentHealth, healthData.Traits.ShieldBleedThrough);
 
             if (CurrentHealth <= 0)
             {
                 IsDead = true;
                 StopRegen();
-                events.OnDieEvent?.Invoke(amount);
+                events.OnDieEvent?.Invoke(info.Amount);
             }
             else
             {
                 StartRegen(withDelay: true);
-                events.OnDamageEvent?.Invoke(amount);
+                events.OnDamageEvent?.Invoke(info.Amount);
             }
         }
 

@@ -169,7 +169,7 @@ namespace Healthy.Networking.Mirror
         [ClientRpc] private void RpcBroadcastMaxShield()               { if (isServer) return; health.events.OnMaxShieldEvent?.Invoke(); }
 
         // Commands — called by any client, executed on the server.
-        [Command(requiresAuthority = false)] public void CmdDamage(float amount)           => health.Damage(amount);
+        [Command(requiresAuthority = false)] public void CmdDamage(float amount)           => health.TakeDamage(new DamageInfo { Amount = amount });
         [Command(requiresAuthority = false)] public void CmdHealHealth(float amount)       => health.HealHealth(amount);
         [Command(requiresAuthority = false)] public void CmdChargeShield(float amount)     => health.ChargeShield(amount);
         [Command(requiresAuthority = false)] public void CmdRevive()                       => health.Revive();
