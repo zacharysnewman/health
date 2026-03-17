@@ -1,3 +1,18 @@
+# [2.0.0](https://github.com/zacharysnewman/health/compare/v1.4.1...v2.0.0) (2026-03-17)
+
+
+* feat!: replace Damage(float) with TakeDamage(DamageInfo) via IDamageable ([b5dcfaf](https://github.com/zacharysnewman/health/commit/b5dcfafa4dac304ee2f53aecc0a7e4683ebf4632))
+
+
+### BREAKING CHANGES
+
+* Health now implements IDamageable from combat-contracts.
+The Damage(float) method is replaced by TakeDamage(DamageInfo) which
+carries richer context (point, direction, instigator, source tag).
+All networking adapters and samples updated accordingly.
+
+Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+
 ## [1.4.1](https://github.com/zacharysnewman/health/compare/v1.4.0...v1.4.1) (2026-03-15)
 
 
