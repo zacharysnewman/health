@@ -1,3 +1,10 @@
+# [2.1.0](https://github.com/zacharysnewman/health/compare/v2.0.0...v2.1.0) (2026-03-18)
+
+
+### Features
+
+* add HealthFXAdapter for drop-on SFX and VFX prefab wiring ([1b10edf](https://github.com/zacharysnewman/health/commit/1b10edfb43522af094d29aef36d4f4407168ec29))
+
 # [2.0.0](https://github.com/zacharysnewman/health/compare/v1.4.1...v2.0.0) (2026-03-17)
 
 
